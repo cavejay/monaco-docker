@@ -1,0 +1,30 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: docker w/ publish
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: docker_user
+      password:
+        from_secret: docker_pw
+      repo: cavejay/monaco
+      tags: latest
+      auto_tag: true
+      dockerfile: ./dockerfile
+
+  - name: Notify
+    image: appleboy/drone-discord
+    settings:
+      webhook_id:
+        from_secret: discord_webhook_id
+      webhook_token:
+        from_secret: discord_webhook_token
+      message: >
+        {{#success build.status}}
+          monaco-docker build {{build.number}} succeeded. Yay.
+        {{else}}
+          monaco-docker build {{build.number}} failed. Fix me please.
+        {{/success}}
